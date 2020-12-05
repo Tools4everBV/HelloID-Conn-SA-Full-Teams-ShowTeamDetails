@@ -1,10 +1,10 @@
 <!-- Description -->
 ## Description
-This HelloID Service Automation Delegated Form provides can show some details and the Member/Owner of a Microsoft Teams Team
+This HelloID Service Automation Delegated Form can show some details and the Member/Owner of a Microsoft Teams Team
 
 <!-- Requirements -->
 ## Requirements
-The Powershell Module "MicrosoftTeams" is required on the HelloID Agent Server in order to use this Form
+The Powershell Module "MicrosoftTeams" and "AzureAD" is required on the HelloID Agent Server in order to use this Form
  
 <!-- TABLE OF CONTENTS -->
 ## Table of Contents
