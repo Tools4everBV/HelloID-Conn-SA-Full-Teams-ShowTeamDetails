@@ -1,6 +1,5 @@
 # Set TLS to accept TLS, TLS 1.1 and TLS 1.2
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls -bor [Net.SecurityProtocolType]::Tls11 -bor [Net.SecurityProtocolType]::Tls12
-
 #HelloID variables
 #Note: when running this script inside HelloID; portalUrl and API credentials are provided automatically (generate and save API credentials first in your admin panel!)
 $portalUrl = "https://CUSTOMER.helloid.com"
@@ -16,16 +15,18 @@ $script:duplicateFormSuffix = "_tmp" #the suffix will be added to all HelloID re
 #NOTE: You can also update the HelloID Global variable values afterwards in the HelloID Admin Portal: https://<CUSTOMER>.helloid.com/admin/variablelibrary
 $globalHelloIDVariables = [System.Collections.Generic.List[object]]@();
 
-#Global variable #1 >> TeamsAdminPWD
-$tmpName = @'
-TeamsAdminPWD
-'@ 
-$tmpValue = "" 
-$globalHelloIDVariables.Add([PSCustomObject]@{name = $tmpName; value = $tmpValue; secret = "True"});
-
-#Global variable #2 >> TeamsAdminUser
+#Global variable #1 >> TeamsAdminUser
 $tmpName = @'
 TeamsAdminUser
+'@ 
+$tmpValue = @'
+ramon@schoulens.onmicrosoft.com
+'@ 
+$globalHelloIDVariables.Add([PSCustomObject]@{name = $tmpName; value = $tmpValue; secret = "False"});
+
+#Global variable #2 >> TeamsAdminPWD
+$tmpName = @'
+TeamsAdminPWD
 '@ 
 $tmpValue = "" 
 $globalHelloIDVariables.Add([PSCustomObject]@{name = $tmpName; value = $tmpValue; secret = "True"});
@@ -33,7 +34,6 @@ $globalHelloIDVariables.Add([PSCustomObject]@{name = $tmpName; value = $tmpValue
 
 #make sure write-information logging is visual
 $InformationPreference = "continue"
-
 # Check for prefilled API Authorization header
 if (-not [string]::IsNullOrEmpty($portalApiBasic)) {
     $script:headers = @{"authorization" = $portalApiBasic}
@@ -47,7 +47,6 @@ if (-not [string]::IsNullOrEmpty($portalApiBasic)) {
     $script:headers = @{"authorization" = $Key}
     Write-Information "Using manual API credentials"
 }
-
 # Check for prefilled PortalBaseURL
 if (-not [string]::IsNullOrEmpty($portalBaseUrl)) {
     $script:PortalBaseUrl = $portalBaseUrl
@@ -56,10 +55,8 @@ if (-not [string]::IsNullOrEmpty($portalBaseUrl)) {
     $script:PortalBaseUrl = $portalUrl
     Write-Information "Using manual PortalURL: $script:PortalBaseUrl"
 }
-
 # Define specific endpoint URI
 $script:PortalBaseUrl = $script:PortalBaseUrl.trim("/") + "/"  
-
 # Make sure to reveive an empty array using PowerShell Core
 function ConvertFrom-Json-WithEmptyArray([string]$jsonString) {
     # Running in PowerShell Core?
@@ -71,16 +68,13 @@ function ConvertFrom-Json-WithEmptyArray([string]$jsonString) {
         return ,$r  # Force return value to be an array using a comma
     }
 }
-
 function Invoke-HelloIDGlobalVariable {
     param(
         [parameter(Mandatory)][String]$Name,
         [parameter(Mandatory)][String][AllowEmptyString()]$Value,
         [parameter(Mandatory)][String]$Secret
     )
-
     $Name = $Name + $(if ($script:duplicateForm -eq $true) { $script:duplicateFormSuffix })
-
     try {
         $uri = ($script:PortalBaseUrl + "api/v1/automation/variables/named/$Name")
         $response = Invoke-RestMethod -Method Get -Uri $uri -Headers $script:headers -ContentType "application/json" -Verbose:$false
@@ -98,7 +92,6 @@ function Invoke-HelloIDGlobalVariable {
             $uri = ($script:PortalBaseUrl + "api/v1/automation/variable")
             $response = Invoke-RestMethod -Method Post -Uri $uri -Headers $script:headers -ContentType "application/json" -Verbose:$false -Body $body
             $variableGuid = $response.automationVariableGuid
-
             Write-Information "Variable '$Name' created$(if ($script:debugLogging -eq $true) { ": " + $variableGuid })"
         } else {
             $variableGuid = $response.automationVariableGuid
@@ -108,7 +101,6 @@ function Invoke-HelloIDGlobalVariable {
         Write-Error "Variable '$Name', message: $_"
     }
 }
-
 function Invoke-HelloIDAutomationTask {
     param(
         [parameter(Mandatory)][String]$TaskName,
@@ -122,7 +114,6 @@ function Invoke-HelloIDAutomationTask {
     )
     
     $TaskName = $TaskName + $(if ($script:duplicateForm -eq $true) { $script:duplicateFormSuffix })
-
     try {
         $uri = ($script:PortalBaseUrl +"api/v1/automationtasks?search=$TaskName&container=$AutomationContainer")
         $responseRaw = (Invoke-RestMethod -Method Get -Uri $uri -Headers $script:headers -ContentType "application/json" -Verbose:$false) 
@@ -130,7 +121,6 @@ function Invoke-HelloIDAutomationTask {
     
         if([string]::IsNullOrEmpty($response.automationTaskGuid) -or $ForceCreateTask -eq $true) {
             #Create Task
-
             $body = @{
                 name                = $TaskName;
                 useTemplate         = $UseTemplate;
@@ -144,7 +134,6 @@ function Invoke-HelloIDAutomationTask {
             $uri = ($script:PortalBaseUrl +"api/v1/automationtasks/powershell")
             $response = Invoke-RestMethod -Method Post -Uri $uri -Headers $script:headers -ContentType "application/json" -Verbose:$false -Body $body
             $taskGuid = $response.automationTaskGuid
-
             Write-Information "Powershell task '$TaskName' created$(if ($script:debugLogging -eq $true) { ": " + $taskGuid })"
         } else {
             #Get TaskGUID
@@ -154,10 +143,8 @@ function Invoke-HelloIDAutomationTask {
     } catch {
         Write-Error "Powershell task '$TaskName', message: $_"
     }
-
     $returnObject.Value = $taskGuid
 }
-
 function Invoke-HelloIDDatasource {
     param(
         [parameter(Mandatory)][String]$DatasourceName,
@@ -169,9 +156,7 @@ function Invoke-HelloIDDatasource {
         [parameter()][String][AllowEmptyString()]$AutomationTaskGuid,
         [parameter(Mandatory)][Ref]$returnObject
     )
-
     $DatasourceName = $DatasourceName + $(if ($script:duplicateForm -eq $true) { $script:duplicateFormSuffix })
-
     $datasourceTypeName = switch($DatasourceType) { 
         "1" { "Native data source"; break} 
         "2" { "Static data source"; break} 
@@ -209,10 +194,8 @@ function Invoke-HelloIDDatasource {
     } catch {
       Write-Error "$datasourceTypeName '$DatasourceName', message: $_"
     }
-
     $returnObject.Value = $datasourceGuid
 }
-
 function Invoke-HelloIDDynamicForm {
     param(
         [parameter(Mandatory)][String]$FormName,
@@ -221,7 +204,6 @@ function Invoke-HelloIDDynamicForm {
     )
     
     $FormName = $FormName + $(if ($script:duplicateForm -eq $true) { $script:duplicateFormSuffix })
-
     try {
         try {
             $uri = ($script:PortalBaseUrl +"api/v1/forms/$FormName")
@@ -250,11 +232,8 @@ function Invoke-HelloIDDynamicForm {
     } catch {
         Write-Error "Dynamic form '$FormName', message: $_"
     }
-
     $returnObject.Value = $formGuid
 }
-
-
 function Invoke-HelloIDDelegatedForm {
     param(
         [parameter(Mandatory)][String]$DelegatedFormName,
@@ -263,11 +242,11 @@ function Invoke-HelloIDDelegatedForm {
         [parameter()][String][AllowEmptyString()]$Categories,
         [parameter(Mandatory)][String]$UseFaIcon,
         [parameter()][String][AllowEmptyString()]$FaIcon,
+        [parameter()][String][AllowEmptyString()]$task,
         [parameter(Mandatory)][Ref]$returnObject
     )
     $delegatedFormCreated = $false
     $DelegatedFormName = $DelegatedFormName + $(if ($script:duplicateForm -eq $true) { $script:duplicateFormSuffix })
-
     try {
         try {
             $uri = ($script:PortalBaseUrl +"api/v1/delegatedforms/$DelegatedFormName")
@@ -285,6 +264,7 @@ function Invoke-HelloIDDelegatedForm {
                 accessGroups    = (ConvertFrom-Json-WithEmptyArray($AccessGroups));
                 useFaIcon       = $UseFaIcon;
                 faIcon          = $FaIcon;
+                task            = ConvertFrom-Json -inputObject $task;
             }    
             $body = ConvertTo-Json -InputObject $body
     
@@ -294,7 +274,6 @@ function Invoke-HelloIDDelegatedForm {
             $delegatedFormGuid = $response.delegatedFormGUID
             Write-Information "Delegated form '$DelegatedFormName' created$(if ($script:debugLogging -eq $true) { ": " + $delegatedFormGuid })"
             $delegatedFormCreated = $true
-
             $bodyCategories = $Categories
             $uri = ($script:PortalBaseUrl +"api/v1/delegatedforms/$delegatedFormGuid/categories")
             $response = Invoke-RestMethod -Method Post -Uri $uri -Headers $script:headers -ContentType "application/json" -Verbose:$false -Body $bodyCategories
@@ -307,10 +286,10 @@ function Invoke-HelloIDDelegatedForm {
     } catch {
         Write-Error "Delegated form '$DelegatedFormName', message: $_"
     }
-
     $returnObject.value.guid = $delegatedFormGuid
     $returnObject.value.created = $delegatedFormCreated
 }
+
 <# Begin: HelloID Global Variables #>
 foreach ($item in $globalHelloIDVariables) {
 	Invoke-HelloIDGlobalVariable -Name $item.name -Value $item.value -Secret $item.secret 
@@ -319,100 +298,215 @@ foreach ($item in $globalHelloIDVariables) {
 
 
 <# Begin: HelloID Data sources #>
-<# Begin: DataSource "Teams-get-team-users" #>
-$tmpScript = @'
-$groupId = $formInput.selectedGroup.GroupId
-$role = $formInput.Role
+<# Begin: DataSource "Get-Details-Team-Teams-get-team-members" #>
+$tmpPsScript = @'
+#Input: TeamsAdminUser
+#Input: TeamsAdminPWD
+
+$VerbosePreference = "SilentlyContinue"
+$InformationPreference = "Continue"
+$WarningPreference = "Continue"
+
+# variables configured in form
+$groupId = $datasource.selectedTeam.GroupId
+$role = $datasource.role
 
 $connected = $false
 try {
-	Import-Module MicrosoftTeams
+	$module = Import-Module MicrosoftTeams
 	$pwd = ConvertTo-SecureString -string $TeamsAdminPWD -AsPlainText -Force
 	$cred = New-Object System.Management.Automation.PSCredential $TeamsAdminUser, $pwd
-	Connect-MicrosoftTeams -Credential $cred
-    HID-Write-Status -Message "Connected to Microsoft Teams" -Event Information
-    HID-Write-Summary -Message "Connected to Microsoft Teams" -Event Information
-	$connected = $true
+	$teamsConnection = Connect-MicrosoftTeams -Credential $cred
+    Write-Information "Connected to Microsoft Teams"
+    $connected = $true
 }
 catch
 {	
-    HID-Write-Status -Message "Could not connect to Microsoft Teams. Error: $($_.Exception.Message)" -Event Error
-    HID-Write-Summary -Message "Failed to connect to Microsoft Teams" -Event Failed
+    Write-Error "Could not connect to Microsoft Teams. Error: $($_.Exception.Message)"
 }
 
 if ($connected)
 {
 	try {
-		$teams = Get-TeamUser -GroupId $groupId -Role $role
+		$users = Get-TeamUser -GroupId $groupId -Role $role
+        Write-Information "Result count: $(@($users).Count)"
 
-		if(@($teams).Count -gt 0){
-			foreach($teamuser in $teams)
+		if(@($users).Count -gt 0){
+			foreach($user in $users)
 			{
-				$addRow = @{User=$teamuser.User; UserId=$teamuser.UserId; Name=$teamuser.Name; Role=$teamuser.Role; }
-				Hid-Add-TaskResult -ResultValue $addRow
+				$resultObject = @{User=$user.User; UserId=$user.UserId; Name=$user.Name; Role=$user.Role}
+                Write-Output $resultObject
 			}
-		}else{
-			Hid-Add-TaskResult -ResultValue []
 		}
 	}
 	catch
 	{
-		HID-Write-Status -Message "Error getting Team Members. Error: $($_.Exception.Message)" -Event Error
-		HID-Write-Summary -Message "Error getting Team Members" -Event Failed
-		Hid-Add-TaskResult -ResultValue []
-	}
+		Write-Error "Error searching Azure. Error: $($_.Exception.Message)"
+    }
 }
-else
-{
-	Hid-Add-TaskResult -ResultValue []
-}
-'@; 
-
-$tmpVariables = @'
-
-'@ 
-
-$taskGuid = [PSCustomObject]@{} 
-$dataSourceGuid_3_Name = @'
-Teams-get-team-users
-'@ 
-Invoke-HelloIDAutomationTask -TaskName $dataSourceGuid_3_Name -UseTemplate "False" -AutomationContainer "1" -Variables $tmpVariables -PowershellScript $tmpScript -returnObject ([Ref]$taskGuid) 
-
-$tmpInput = @'
-[{"description":"","translateDescription":false,"inputFieldType":1,"key":"selectedGroup","type":0,"options":0},{"description":"","translateDescription":false,"inputFieldType":1,"key":"Role","type":0,"options":0}]
 '@ 
 $tmpModel = @'
-[{"key":"Name","type":0},{"key":"Role","type":0},{"key":"UserId","type":0},{"key":"User","type":0}]
+[{"key":"Name","type":0},{"key":"User","type":0},{"key":"UserId","type":0},{"key":"Role","type":0}]
 '@ 
-$dataSourceGuid_3 = [PSCustomObject]@{} 
-$dataSourceGuid_3_Name = @'
-Teams-get-team-users
+$tmpInput = @'
+[{"description":"","translateDescription":false,"inputFieldType":1,"key":"selectedTeam","type":0,"options":1},{"description":null,"translateDescription":false,"inputFieldType":1,"key":"Role","type":0,"options":1}]
 '@ 
-Invoke-HelloIDDatasource -DatasourceName $dataSourceGuid_3_Name -DatasourceType "3" -DatasourceInput $tmpInput -DatasourceModel $tmpModel -AutomationTaskGuid $taskGuid -returnObject ([Ref]$dataSourceGuid_3) 
-<# End: DataSource "Teams-get-team-users" #>
+$dataSourceGuid_2 = [PSCustomObject]@{} 
+$dataSourceGuid_2_Name = @'
+Get-Details-Team-Teams-get-team-members
+'@ 
+Invoke-HelloIDDatasource -DatasourceName $dataSourceGuid_2_Name -DatasourceType "4" -DatasourceInput $tmpInput -DatasourcePsScript $tmpPsScript -DatasourceModel $tmpModel -returnObject ([Ref]$dataSourceGuid_2) 
+<# End: DataSource "Get-Details-Team-Teams-get-team-members" #>
 
-<# Begin: DataSource "Teams-get-team-details" #>
-$tmpScript = @'
+<# Begin: DataSource "Get-Details-Team-Teams-get-teams" #>
+$tmpPsScript = @'
 #Input: TeamsAdminUser
 #Input: TeamsAdminPWD
-$groupId = $formInput.selectedGroup.GroupId
-#$groupId = '0293ec24-013d-4a3a-ba2b-7836ef8f15dd'
+
+# Set TLS to accept TLS, TLS 1.1 and TLS 1.2
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls -bor [Net.SecurityProtocolType]::Tls11 -bor [Net.SecurityProtocolType]::Tls12
+
+$VerbosePreference = "SilentlyContinue"
+$InformationPreference = "Continue"
+$WarningPreference = "Continue"
 
 $connected = $false
 try {
-	Import-Module MicrosoftTeams
-	$pwd = ConvertTo-SecureString -string $TeamsAdminPWD -AsPlainText ?Force
+	$module = Import-Module MicrosoftTeams
+	$pwd = ConvertTo-SecureString -string $TeamsAdminPWD -AsPlainText -Force
 	$cred = New-Object System.Management.Automation.PSCredential $TeamsAdminUser, $pwd
-	Connect-MicrosoftTeams -Credential $cred
-    HID-Write-Status -Message "Connected to Microsoft Teams" -Event Information
-    HID-Write-Summary -Message "Connected to Microsoft Teams" -Event Information
-	$connected = $true
+	$teamsConnection = Connect-MicrosoftTeams -Credential $cred
+    Write-Information "Connected to Microsoft Teams"
+    $connected = $true
 }
 catch
 {	
-    HID-Write-Status -Message "Could not connect to Microsoft Teams. Error: $($_.Exception.Message)" -Event Error
-    HID-Write-Summary -Message "Failed to connect to Microsoft Teams" -Event Failed
+    Write-Error "Could not connect to Microsoft Teams. Error: $($_.Exception.Message)"
 }
+
+if ($connected)
+{
+	try {
+	    $teams = Get-Team
+        Write-Information "Result count: $(@($teams).Count)"
+
+        if(@($teams).Count -gt 0){
+            foreach($team in $teams)
+            {
+                $resultObject = @{DisplayName=$team.DisplayName; Description=$team.Description; MailNickName=$team.MailNickName; Visibility=$team.Visibility; Archived=$team.Archived; GroupId=$team.GroupId;}
+                Write-Output $resultObject
+            }
+        }
+	}
+	catch
+	{
+		Write-Error "Error getting Teams. Error: $($_.Exception.Message)"
+	}
+}
+
+'@ 
+$tmpModel = @'
+[{"key":"MailNickName","type":0},{"key":"Archived","type":0},{"key":"DisplayName","type":0},{"key":"Visibility","type":0},{"key":"Description","type":0},{"key":"GroupId","type":0}]
+'@ 
+$tmpInput = @'
+[]
+'@ 
+$dataSourceGuid_0 = [PSCustomObject]@{} 
+$dataSourceGuid_0_Name = @'
+Get-Details-Team-Teams-get-teams
+'@ 
+Invoke-HelloIDDatasource -DatasourceName $dataSourceGuid_0_Name -DatasourceType "4" -DatasourceInput $tmpInput -DatasourcePsScript $tmpPsScript -DatasourceModel $tmpModel -returnObject ([Ref]$dataSourceGuid_0) 
+<# End: DataSource "Get-Details-Team-Teams-get-teams" #>
+
+<# Begin: DataSource "Get-Details-Team-Teams-get-team-owners" #>
+$tmpPsScript = @'
+#Input: TeamsAdminUser
+#Input: TeamsAdminPWD
+
+$VerbosePreference = "SilentlyContinue"
+$InformationPreference = "Continue"
+$WarningPreference = "Continue"
+
+# variables configured in form
+$groupId = $datasource.selectedTeam.GroupId
+$role = $datasource.role
+
+$connected = $false
+try {
+	$module = Import-Module MicrosoftTeams
+	$pwd = ConvertTo-SecureString -string $TeamsAdminPWD -AsPlainText -Force
+	$cred = New-Object System.Management.Automation.PSCredential $TeamsAdminUser, $pwd
+	$teamsConnection = Connect-MicrosoftTeams -Credential $cred
+    Write-Information "Connected to Microsoft Teams"
+    $connected = $true
+}
+catch
+{	
+    Write-Error "Could not connect to Microsoft Teams. Error: $($_.Exception.Message)"
+}
+
+if ($connected)
+{
+	try {
+		$users = Get-TeamUser -GroupId $groupId -Role $role
+        Write-Information "Result count: $(@($users).Count)"
+
+		if(@($users).Count -gt 0){
+			foreach($user in $users)
+			{
+				$resultObject = @{User=$user.User; UserId=$user.UserId; Name=$user.Name; Role=$user.Role}
+                Write-Output $resultObject
+			}
+		}
+	}
+	catch
+	{
+		Write-Error "Error searching Azure. Error: $($_.Exception.Message)"
+    }
+}
+'@ 
+$tmpModel = @'
+[{"key":"Name","type":0},{"key":"User","type":0},{"key":"UserId","type":0},{"key":"Role","type":0}]
+'@ 
+$tmpInput = @'
+[{"description":null,"translateDescription":false,"inputFieldType":1,"key":"selectedTeam","type":0,"options":1},{"description":null,"translateDescription":false,"inputFieldType":1,"key":"Role","type":0,"options":1}]
+'@ 
+$dataSourceGuid_3 = [PSCustomObject]@{} 
+$dataSourceGuid_3_Name = @'
+Get-Details-Team-Teams-get-team-owners
+'@ 
+Invoke-HelloIDDatasource -DatasourceName $dataSourceGuid_3_Name -DatasourceType "4" -DatasourceInput $tmpInput -DatasourcePsScript $tmpPsScript -DatasourceModel $tmpModel -returnObject ([Ref]$dataSourceGuid_3) 
+<# End: DataSource "Get-Details-Team-Teams-get-team-owners" #>
+
+<# Begin: DataSource "Get-Details-Team-Teams-get-team-details" #>
+$tmpPsScript = @'
+#Input: TeamsAdminUser
+#Input: TeamsAdminPWD
+
+# Set TLS to accept TLS, TLS 1.1 and TLS 1.2
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls -bor [Net.SecurityProtocolType]::Tls11 -bor [Net.SecurityProtocolType]::Tls12
+
+$VerbosePreference = "SilentlyContinue"
+$InformationPreference = "Continue"
+$WarningPreference = "Continue"
+
+# variables configured in form
+$groupId = $datasource.selectedTeam.GroupId
+
+$connected = $false
+try {
+	$module = Import-Module MicrosoftTeams
+	$pwd = ConvertTo-SecureString -string $TeamsAdminPWD -AsPlainText -Force
+	$cred = New-Object System.Management.Automation.PSCredential $TeamsAdminUser, $pwd
+	$teamsConnection = Connect-MicrosoftTeams -Credential $cred
+    Write-Information "Connected to Microsoft Teams"
+    $connected = $true
+}
+catch
+{	
+    Write-Error "Could not connect to Microsoft Teams. Error: $($_.Exception.Message)"
+}
+
 
 if ($connected)
 {
@@ -423,199 +517,33 @@ if ($connected)
          foreach($tmp in $teams.psObject.properties)
             {
                 $returnObject = [ordered]@{name=$tmp.Name; value=$tmp.value}
-                Hid-Add-TaskResult -ResultValue $returnObject
+                Write-Output $returnObject
             }
-        }else{
-            Hid-Add-TaskResult -ResultValue []
         }
 	}
 	catch
 	{
-		HID-Write-Status -Message "Error getting Team Details. Error: $($_.Exception.Message)" -Event Error
-		HID-Write-Summary -Message "Error getting Team Details" -Event Failed
-		Hid-Add-TaskResult -ResultValue []
+		Write-Error "Error getting Team Details. Error: $($_.Exception.Message)"
 	}
 }
-else
-{
-	Hid-Add-TaskResult -ResultValue []
-}
-
-'@; 
-
-$tmpVariables = @'
-
-'@ 
-
-$taskGuid = [PSCustomObject]@{} 
-$dataSourceGuid_1_Name = @'
-teams-get-team-details
-'@ 
-Invoke-HelloIDAutomationTask -TaskName $dataSourceGuid_1_Name -UseTemplate "False" -AutomationContainer "1" -Variables $tmpVariables -PowershellScript $tmpScript -returnObject ([Ref]$taskGuid) 
-
-$tmpInput = @'
-[{"description":"","translateDescription":false,"inputFieldType":1,"key":"selectedGroup","type":0,"options":0}]
 '@ 
 $tmpModel = @'
-[{"key":"Visibility","type":0},{"key":"MailNickName","type":0},{"key":"DisplayName","type":0},{"key":"GroupId","type":0},{"key":"Archived","type":0},{"key":"Description","type":0}]
+[{"key":"name","type":0},{"key":"value","type":0}]
+'@ 
+$tmpInput = @'
+[{"description":"","translateDescription":false,"inputFieldType":1,"key":"selectedTeam","type":0,"options":1}]
 '@ 
 $dataSourceGuid_1 = [PSCustomObject]@{} 
 $dataSourceGuid_1_Name = @'
-Teams-get-team-details
+Get-Details-Team-Teams-get-team-details
 '@ 
-Invoke-HelloIDDatasource -DatasourceName $dataSourceGuid_1_Name -DatasourceType "3" -DatasourceInput $tmpInput -DatasourceModel $tmpModel -AutomationTaskGuid $taskGuid -returnObject ([Ref]$dataSourceGuid_1) 
-<# End: DataSource "Teams-get-team-details" #>
-
-<# Begin: DataSource "Teams-get-team-users" #>
-$tmpScript = @'
-$groupId = $formInput.selectedGroup.GroupId
-$role = $formInput.Role
-
-$connected = $false
-try {
-	Import-Module MicrosoftTeams
-	$pwd = ConvertTo-SecureString -string $TeamsAdminPWD -AsPlainText -Force
-	$cred = New-Object System.Management.Automation.PSCredential $TeamsAdminUser, $pwd
-	Connect-MicrosoftTeams -Credential $cred
-    HID-Write-Status -Message "Connected to Microsoft Teams" -Event Information
-    HID-Write-Summary -Message "Connected to Microsoft Teams" -Event Information
-	$connected = $true
-}
-catch
-{	
-    HID-Write-Status -Message "Could not connect to Microsoft Teams. Error: $($_.Exception.Message)" -Event Error
-    HID-Write-Summary -Message "Failed to connect to Microsoft Teams" -Event Failed
-}
-
-if ($connected)
-{
-	try {
-		$teams = Get-TeamUser -GroupId $groupId -Role $role
-
-		if(@($teams).Count -gt 0){
-			foreach($teamuser in $teams)
-			{
-				$addRow = @{User=$teamuser.User; UserId=$teamuser.UserId; Name=$teamuser.Name; Role=$teamuser.Role; }
-				Hid-Add-TaskResult -ResultValue $addRow
-			}
-		}else{
-			Hid-Add-TaskResult -ResultValue []
-		}
-	}
-	catch
-	{
-		HID-Write-Status -Message "Error getting Team Members. Error: $($_.Exception.Message)" -Event Error
-		HID-Write-Summary -Message "Error getting Team Members" -Event Failed
-		Hid-Add-TaskResult -ResultValue []
-	}
-}
-else
-{
-	Hid-Add-TaskResult -ResultValue []
-}
-'@; 
-
-$tmpVariables = @'
-
-'@ 
-
-$taskGuid = [PSCustomObject]@{} 
-$dataSourceGuid_2_Name = @'
-Teams-get-team-users
-'@ 
-Invoke-HelloIDAutomationTask -TaskName $dataSourceGuid_2_Name -UseTemplate "False" -AutomationContainer "1" -Variables $tmpVariables -PowershellScript $tmpScript -returnObject ([Ref]$taskGuid) 
-
-$tmpInput = @'
-[{"description":"","translateDescription":false,"inputFieldType":1,"key":"selectedGroup","type":0,"options":0},{"description":"","translateDescription":false,"inputFieldType":1,"key":"Role","type":0,"options":0}]
-'@ 
-$tmpModel = @'
-[{"key":"Name","type":0},{"key":"Role","type":0},{"key":"UserId","type":0},{"key":"User","type":0}]
-'@ 
-$dataSourceGuid_2 = [PSCustomObject]@{} 
-$dataSourceGuid_2_Name = @'
-Teams-get-team-users
-'@ 
-Invoke-HelloIDDatasource -DatasourceName $dataSourceGuid_2_Name -DatasourceType "3" -DatasourceInput $tmpInput -DatasourceModel $tmpModel -AutomationTaskGuid $taskGuid -returnObject ([Ref]$dataSourceGuid_2) 
-<# End: DataSource "Teams-get-team-users" #>
-
-<# Begin: DataSource "Teams-get-teams" #>
-$tmpScript = @'
-#Input: TeamsAdminUser
-#Input: TeamsAdminPWD
-
-$connected = $false
-try {
-	Import-Module MicrosoftTeams
-	$pwd = ConvertTo-SecureString -string $TeamsAdminPWD -AsPlainText ?Force
-	$cred = New-Object System.Management.Automation.PSCredential $TeamsAdminUser, $pwd
-	Connect-MicrosoftTeams -Credential $cred
-    HID-Write-Status -Message "Connected to Microsoft Teams" -Event Information
-    HID-Write-Summary -Message "Connected to Microsoft Teams" -Event Information
-	$connected = $true
-}
-catch
-{	
-    HID-Write-Status -Message "Could not connect to Microsoft Teams. Error: $($_.Exception.Message)" -Event Error
-    HID-Write-Summary -Message "Failed to connect to Microsoft Teams" -Event Failed
-}
-
-if ($connected)
-{
-	try {
-	    $teams = Get-Team
-
-        if(@($teams).Count -gt 0){
-         foreach($team in $teams)
-            {
-                $addRow = @{DisplayName=$team.DisplayName; Description=$team.Description; MailNickName=$team.MailNickName; Visibility=$team.Visibility; Archived=$team.Archived; GroupId=$team.GroupId;}
-                Hid-Write-Status -Message "$addRow" -Event Information
-                Hid-Add-TaskResult -ResultValue $addRow
-            }
-        }else{
-            Hid-Add-TaskResult -ResultValue []
-        }
-	}
-	catch
-	{
-		HID-Write-Status -Message "Error getting Teams. Error: $($_.Exception.Message)" -Event Error
-		HID-Write-Summary -Message "Error getting Teams" -Event Failed
-		Hid-Add-TaskResult -ResultValue []
-	}
-}
-else
-{
-	Hid-Add-TaskResult -ResultValue []
-}
-
-'@; 
-
-$tmpVariables = @'
-
-'@ 
-
-$taskGuid = [PSCustomObject]@{} 
-$dataSourceGuid_0_Name = @'
-Teams-Get-teams
-'@ 
-Invoke-HelloIDAutomationTask -TaskName $dataSourceGuid_0_Name -UseTemplate "False" -AutomationContainer "1" -Variables $tmpVariables -PowershellScript $tmpScript -returnObject ([Ref]$taskGuid) 
-
-$tmpInput = @'
-[{"description":"Filter for DisplayName","translateDescription":false,"inputFieldType":1,"key":"filterDisplayName","type":0,"options":0}]
-'@ 
-$tmpModel = @'
-[{"key":"Archived","type":0},{"key":"Description","type":0},{"key":"GroupId","type":0},{"key":"DisplayName","type":0},{"key":"MailNickName","type":0},{"key":"Visibility","type":0}]
-'@ 
-$dataSourceGuid_0 = [PSCustomObject]@{} 
-$dataSourceGuid_0_Name = @'
-Teams-get-teams
-'@ 
-Invoke-HelloIDDatasource -DatasourceName $dataSourceGuid_0_Name -DatasourceType "3" -DatasourceInput $tmpInput -DatasourceModel $tmpModel -AutomationTaskGuid $taskGuid -returnObject ([Ref]$dataSourceGuid_0) 
-<# End: DataSource "Teams-get-teams" #>
+Invoke-HelloIDDatasource -DatasourceName $dataSourceGuid_1_Name -DatasourceType "4" -DatasourceInput $tmpInput -DatasourcePsScript $tmpPsScript -DatasourceModel $tmpModel -returnObject ([Ref]$dataSourceGuid_1) 
+<# End: DataSource "Get-Details-Team-Teams-get-team-details" #>
 <# End: HelloID Data sources #>
 
 <# Begin: Dynamic Form "Teams - Get Team Details" #>
 $tmpSchema = @"
-[{"label":"Select Team","fields":[{"key":"filterDisplayName","templateOptions":{"label":"Search for DisplayName","required":false},"type":"input","summaryVisibility":"Show","requiresTemplateOptions":true},{"key":"teams","templateOptions":{"label":"Select Team","required":true,"grid":{"columns":[{"headerName":"Display Name","field":"DisplayName"},{"headerName":"Description","field":"Description"},{"headerName":"Mail Nick Name","field":"MailNickName"},{"headerName":"Visibility","field":"Visibility"},{"headerName":"Archived","field":"Archived"},{"headerName":"Group Id","field":"GroupId"}],"height":300,"rowSelection":"single"},"dataSourceConfig":{"dataSourceGuid":"$dataSourceGuid_0","input":{"propertyInputs":[{"propertyName":"filterDisplayName","otherFieldValue":{"otherFieldKey":"filterDisplayName"}}]}},"useFilter":false,"useDefault":false},"type":"grid","summaryVisibility":"Show","requiresTemplateOptions":true}]},{"label":"Team Details","fields":[{"key":"Details","templateOptions":{"label":"Details","required":false,"grid":{"columns":[{"headerName":"Name","field":"name"},{"headerName":"Value","field":"value"}],"height":300,"rowSelection":"single"},"dataSourceConfig":{"dataSourceGuid":"$dataSourceGuid_1","input":{"propertyInputs":[{"propertyName":"selectedGroup","otherFieldValue":{"otherFieldKey":"teams"}}]}},"useDefault":false,"useFilter":false},"type":"grid","summaryVisibility":"Show","requiresTemplateOptions":true},{"key":"Members","templateOptions":{"label":"Members","required":false,"grid":{"columns":[{"headerName":"User","field":"User"},{"headerName":"Name","field":"Name"}],"height":300,"rowSelection":"single"},"dataSourceConfig":{"dataSourceGuid":"$dataSourceGuid_2","input":{"propertyInputs":[{"propertyName":"Role","staticValue":{"value":"Member"}},{"propertyName":"selectedGroup","otherFieldValue":{"otherFieldKey":"teams"}}]}},"useFilter":true,"useDefault":false},"type":"grid","summaryVisibility":"Show","requiresTemplateOptions":true},{"key":"Owners","templateOptions":{"label":"Members","required":false,"grid":{"columns":[{"headerName":"User","field":"User"},{"headerName":"Name","field":"Name"}],"height":300,"rowSelection":"single"},"dataSourceConfig":{"dataSourceGuid":"$dataSourceGuid_3","input":{"propertyInputs":[{"propertyName":"Role","staticValue":{"value":"Owner"}},{"propertyName":"selectedGroup","otherFieldValue":{"otherFieldKey":"teams"}}]}},"useFilter":true,"useDefault":false},"type":"grid","summaryVisibility":"Show","requiresTemplateOptions":true}]}]
+[{"label":"Select Team","fields":[{"key":"teams","templateOptions":{"label":"Select team","required":true,"grid":{"columns":[{"headerName":"Mail Nick Name","field":"MailNickName"},{"headerName":"Archived","field":"Archived"},{"headerName":"Display Name","field":"DisplayName"},{"headerName":"Visibility","field":"Visibility"},{"headerName":"Description","field":"Description"},{"headerName":"Group Id","field":"GroupId"}],"height":300,"rowSelection":"single"},"dataSourceConfig":{"dataSourceGuid":"$dataSourceGuid_0","input":{"propertyInputs":[]}},"useFilter":true,"useDefault":false},"type":"grid","summaryVisibility":"Show","requiresTemplateOptions":true,"requiresKey":true,"requiresDataSource":true}]},{"label":"Team Details","fields":[{"key":"Details","templateOptions":{"label":"Details","required":false,"grid":{"columns":[{"headerName":"Name","field":"name"},{"headerName":"Value","field":"value"}],"height":300,"rowSelection":"single"},"dataSourceConfig":{"dataSourceGuid":"$dataSourceGuid_1","input":{"propertyInputs":[{"propertyName":"selectedTeam","otherFieldValue":{"otherFieldKey":"teams"}}]}},"useDefault":false,"useFilter":false},"type":"grid","summaryVisibility":"Show","requiresTemplateOptions":true,"requiresKey":true,"requiresDataSource":true},{"key":"Members","templateOptions":{"label":"Members","required":false,"grid":{"columns":[{"headerName":"Name","field":"Name"},{"headerName":"User","field":"User"},{"headerName":"User Id","field":"UserId"},{"headerName":"Role","field":"Role"}],"height":300,"rowSelection":"single"},"dataSourceConfig":{"dataSourceGuid":"$dataSourceGuid_2","input":{"propertyInputs":[{"propertyName":"selectedTeam","otherFieldValue":{"otherFieldKey":"teams"}},{"propertyName":"Role","staticValue":{"value":"Member"}}]}},"useFilter":true,"useDefault":false},"type":"grid","summaryVisibility":"Show","requiresTemplateOptions":true,"requiresKey":true,"requiresDataSource":true},{"key":"owners","templateOptions":{"label":"Owners","required":false,"grid":{"columns":[{"headerName":"Name","field":"Name"},{"headerName":"User","field":"User"},{"headerName":"User Id","field":"UserId"},{"headerName":"Role","field":"Role"}],"height":300,"rowSelection":"single"},"dataSourceConfig":{"dataSourceGuid":"$dataSourceGuid_3","input":{"propertyInputs":[{"propertyName":"selectedTeam","otherFieldValue":{"otherFieldKey":"teams"}},{"propertyName":"Role","staticValue":{"value":"Owner"}}]}},"useFilter":true,"useDefault":false},"type":"grid","summaryVisibility":"Show","requiresTemplateOptions":true,"requiresKey":true,"requiresDataSource":true}]}]
 "@ 
 
 $dynamicFormGuid = [PSCustomObject]@{} 
@@ -640,7 +568,6 @@ foreach($group in $delegatedFormAccessGroupNames) {
     }
 }
 $delegatedFormAccessGroupGuids = ($delegatedFormAccessGroupGuids | Select-Object -Unique | ConvertTo-Json -Compress)
-
 $delegatedFormCategoryGuids = @()
 foreach($category in $delegatedFormCategories) {
     try {
@@ -656,12 +583,10 @@ foreach($category in $delegatedFormCategories) {
             name = @{"en" = $category};
         }
         $body = ConvertTo-Json -InputObject $body
-
         $uri = ($script:PortalBaseUrl +"api/v1/delegatedformcategories")
         $response = Invoke-RestMethod -Method Post -Uri $uri -Headers $script:headers -ContentType "application/json" -Verbose:$false -Body $body
         $tmpGuid = $response.delegatedFormCategoryGuid
         $delegatedFormCategoryGuids += $tmpGuid
-
         Write-Information "HelloID Delegated Form category '$category' successfully created$(if ($script:debugLogging -eq $true) { ": " + $tmpGuid })"
     }
 }
@@ -673,6 +598,10 @@ $delegatedFormRef = [PSCustomObject]@{guid = $null; created = $null}
 $delegatedFormName = @'
 Teams - Show Team Details
 '@
-Invoke-HelloIDDelegatedForm -DelegatedFormName $delegatedFormName -DynamicFormGuid $dynamicFormGuid -AccessGroups $delegatedFormAccessGroupGuids -Categories $delegatedFormCategoryGuids -UseFaIcon "True" -FaIcon "fa fa-question-circle" -returnObject ([Ref]$delegatedFormRef) 
+$tmpTask = @'
+{"name":"Teams - Show Team Details","script":null,"runInCloud":false}
+'@ 
+
+Invoke-HelloIDDelegatedForm -DelegatedFormName $delegatedFormName -DynamicFormGuid $dynamicFormGuid -AccessGroups $delegatedFormAccessGroupGuids -Categories $delegatedFormCategoryGuids -UseFaIcon "True" -FaIcon "fa fa-question-circle" -task $tmpTask -returnObject ([Ref]$delegatedFormRef) 
 <# End: Delegated Form #>
 
