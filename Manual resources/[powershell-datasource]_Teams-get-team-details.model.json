@@ -1,0 +1,34 @@
+[
+    {
+        "key":  "Archived",
+        "type":  0
+    },
+    {
+        "key":  "Visibility",
+        "type":  0
+    },
+    {
+        "key":  "Description",
+        "type":  0
+    },
+    {
+        "key":  "Classification",
+        "type":  0
+    },
+    {
+        "key":  "MembershipLimitedToOwners",
+        "type":  0
+    },
+    {
+        "key":  "DisplayName",
+        "type":  0
+    },
+    {
+        "key":  "GroupId",
+        "type":  0
+    },
+    {
+        "key":  "Channel",
+        "type":  0
+    }
+]

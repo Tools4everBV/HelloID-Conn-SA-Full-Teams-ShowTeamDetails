@@ -1,213 +1,311 @@
 [
-  {
-    "label": "Select Team",
-    "fields": [
-      {
-        "key": "teams",
-        "templateOptions": {
-          "label": "Select team",
-          "required": true,
-          "grid": {
-            "columns": [
-              {
-                "headerName": "Mail Nick Name",
-                "field": "MailNickName"
-              },
-              {
-                "headerName": "Archived",
-                "field": "Archived"
-              },
-              {
-                "headerName": "Display Name",
-                "field": "DisplayName"
-              },
-              {
-                "headerName": "Visibility",
-                "field": "Visibility"
-              },
-              {
-                "headerName": "Description",
-                "field": "Description"
-              },
-              {
-                "headerName": "Group Id",
-                "field": "GroupId"
-              }
-            ],
-            "height": 300,
-            "rowSelection": "single"
-          },
-          "dataSourceConfig": {
-            "dataSourceGuid": "$dataSourceGuid_0",
-            "input": {
-              "propertyInputs": []
-            }
-          },
-          "useFilter": true,
-          "useDefault": false
-        },
-        "type": "grid",
-        "summaryVisibility": "Show",
-        "requiresTemplateOptions": true,
-        "requiresKey": true,
-        "requiresDataSource": true
-      }
-    ]
-  },
-  {
-    "label": "Team Details",
-    "fields": [
-      {
-        "key": "Details",
-        "templateOptions": {
-          "label": "Details",
-          "required": false,
-          "grid": {
-            "columns": [
-              {
-                "headerName": "Name",
-                "field": "name"
-              },
-              {
-                "headerName": "Value",
-                "field": "value"
-              }
-            ],
-            "height": 300,
-            "rowSelection": "single"
-          },
-          "dataSourceConfig": {
-            "dataSourceGuid": "$dataSourceGuid_1",
-            "input": {
-              "propertyInputs": [
-                {
-                  "propertyName": "selectedTeam",
-                  "otherFieldValue": {
-                    "otherFieldKey": "teams"
-                  }
-                }
-              ]
-            }
-          },
-          "useDefault": false,
-          "useFilter": false
-        },
-        "type": "grid",
-        "summaryVisibility": "Show",
-        "requiresTemplateOptions": true,
-        "requiresKey": true,
-        "requiresDataSource": true
-      },
-      {
-        "key": "Members",
-        "templateOptions": {
-          "label": "Members",
-          "required": false,
-          "grid": {
-            "columns": [
-              {
-                "headerName": "Name",
-                "field": "Name"
-              },
-              {
-                "headerName": "User",
-                "field": "User"
-              },
-              {
-                "headerName": "User Id",
-                "field": "UserId"
-              },
-              {
-                "headerName": "Role",
-                "field": "Role"
-              }
-            ],
-            "height": 300,
-            "rowSelection": "single"
-          },
-          "dataSourceConfig": {
-            "dataSourceGuid": "$dataSourceGuid_2",
-            "input": {
-              "propertyInputs": [
-                {
-                  "propertyName": "selectedTeam",
-                  "otherFieldValue": {
-                    "otherFieldKey": "teams"
-                  }
-                },
-                {
-                  "propertyName": "Role",
-                  "staticValue": {
-                    "value": "Member"
-                  }
-                }
-              ]
-            }
-          },
-          "useFilter": true,
-          "useDefault": false
-        },
-        "type": "grid",
-        "summaryVisibility": "Show",
-        "requiresTemplateOptions": true,
-        "requiresKey": true,
-        "requiresDataSource": true
-      },
-      {
-        "key": "owners",
-        "templateOptions": {
-          "label": "Owners",
-          "required": false,
-          "grid": {
-            "columns": [
-              {
-                "headerName": "Name",
-                "field": "Name"
-              },
-              {
-                "headerName": "User",
-                "field": "User"
-              },
-              {
-                "headerName": "User Id",
-                "field": "UserId"
-              },
-              {
-                "headerName": "Role",
-                "field": "Role"
-              }
-            ],
-            "height": 300,
-            "rowSelection": "single"
-          },
-          "dataSourceConfig": {
-            "dataSourceGuid": "$dataSourceGuid_3",
-            "input": {
-              "propertyInputs": [
-                {
-                  "propertyName": "selectedTeam",
-                  "otherFieldValue": {
-                    "otherFieldKey": "teams"
-                  }
-                },
-                {
-                  "propertyName": "Role",
-                  "staticValue": {
-                    "value": "Owner"
-                  }
-                }
-              ]
-            }
-          },
-          "useFilter": true,
-          "useDefault": false
-        },
-        "type": "grid",
-        "summaryVisibility": "Show",
-        "requiresTemplateOptions": true,
-        "requiresKey": true,
-        "requiresDataSource": true
-      }
-    ]
-  }
+    {
+        "label":  "Select Team",
+        "fields":  [
+                       {
+                           "key":  "searchValue",
+                           "templateOptions":  {
+                                                   "label":  "Search for displayname",
+                                                   "required":  true
+                                               },
+                           "type":  "input",
+                           "summaryVisibility":  "Show",
+                           "requiresTemplateOptions":  true,
+                           "requiresKey":  true,
+                           "requiresDataSource":  false
+                       },
+                       {
+                           "key":  "teams",
+                           "templateOptions":  {
+                                                   "label":  "Select team",
+                                                   "required":  true,
+                                                   "grid":  {
+                                                                "columns":  [
+                                                                                {
+                                                                                    "headerName":  "Display Name",
+                                                                                    "field":  "DisplayName"
+                                                                                },
+                                                                                {
+                                                                                    "headerName":  "Description",
+                                                                                    "field":  "Description"
+                                                                                },
+                                                                                {
+                                                                                    "headerName":  "Mail Nick Name",
+                                                                                    "field":  "MailNickName"
+                                                                                },
+                                                                                {
+                                                                                    "headerName":  "Mailaddress",
+                                                                                    "field":  "Mailaddress"
+                                                                                },
+                                                                                {
+                                                                                    "headerName":  "Visibility",
+                                                                                    "field":  "Visibility"
+                                                                                },
+                                                                                {
+                                                                                    "headerName":  "Group Id",
+                                                                                    "field":  "GroupId"
+                                                                                }
+                                                                            ],
+                                                                "height":  300,
+                                                                "rowSelection":  "single"
+                                                            },
+                                                   "dataSourceConfig":  {
+                                                                            "dataSourceGuid":  "$dataSourceGuid_0",
+                                                                            "input":  {
+                                                                                          "propertyInputs":  [
+                                                                                                                 {
+                                                                                                                     "propertyName":  "searchValue",
+                                                                                                                     "otherFieldValue":  {
+                                                                                                                                             "otherFieldKey":  "searchValue"
+                                                                                                                                         }
+                                                                                                                 }
+                                                                                                             ]
+                                                                                      }
+                                                                        },
+                                                   "useFilter":  true,
+                                                   "useDefault":  false
+                                               },
+                           "type":  "grid",
+                           "summaryVisibility":  "Show",
+                           "requiresTemplateOptions":  true,
+                           "requiresKey":  true,
+                           "requiresDataSource":  true
+                       }
+                   ]
+    },
+    {
+        "label":  "Team Details",
+        "fields":  [
+                       {
+                           "key":  "Details",
+                           "templateOptions":  {
+                                                   "label":  "Details",
+                                                   "required":  false,
+                                                   "grid":  {
+                                                                "columns":  [
+                                                                                {
+                                                                                    "headerName":  "Display Name",
+                                                                                    "field":  "DisplayName"
+                                                                                },
+                                                                                {
+                                                                                    "headerName":  "Description",
+                                                                                    "field":  "Description"
+                                                                                },
+                                                                                {
+                                                                                    "headerName":  "Visibility",
+                                                                                    "field":  "Visibility"
+                                                                                },
+                                                                                {
+                                                                                    "headerName":  "Channel",
+                                                                                    "field":  "Channel"
+                                                                                },
+                                                                                {
+                                                                                    "headerName":  "Archived",
+                                                                                    "field":  "Archived"
+                                                                                },
+                                                                                {
+                                                                                    "headerName":  "Membership Limited To Owners",
+                                                                                    "field":  "MembershipLimitedToOwners"
+                                                                                },
+                                                                                {
+                                                                                    "headerName":  "Classification",
+                                                                                    "field":  "Classification"
+                                                                                },
+                                                                                {
+                                                                                    "headerName":  "Group Id",
+                                                                                    "field":  "GroupId"
+                                                                                }
+                                                                            ],
+                                                                "height":  300,
+                                                                "rowSelection":  "single"
+                                                            },
+                                                   "dataSourceConfig":  {
+                                                                            "dataSourceGuid":  "$dataSourceGuid_1",
+                                                                            "input":  {
+                                                                                          "propertyInputs":  [
+                                                                                                                 {
+                                                                                                                     "propertyName":  "selectedGroup",
+                                                                                                                     "otherFieldValue":  {
+                                                                                                                                             "otherFieldKey":  "teams"
+                                                                                                                                         }
+                                                                                                                 }
+                                                                                                             ]
+                                                                                      }
+                                                                        },
+                                                   "useDefault":  false,
+                                                   "useFilter":  false
+                                               },
+                           "type":  "grid",
+                           "summaryVisibility":  "Show",
+                           "requiresTemplateOptions":  true,
+                           "requiresKey":  true,
+                           "requiresDataSource":  true
+                       },
+                       {
+                           "key":  "Members",
+                           "templateOptions":  {
+                                                   "label":  "Members",
+                                                   "required":  false,
+                                                   "grid":  {
+                                                                "columns":  [
+                                                                                {
+                                                                                    "headerName":  "Display Name",
+                                                                                    "field":  "DisplayName"
+                                                                                },
+                                                                                {
+                                                                                    "headerName":  "Mailaddress",
+                                                                                    "field":  "Mailaddress"
+                                                                                },
+                                                                                {
+                                                                                    "headerName":  "Roles",
+                                                                                    "field":  "Roles"
+                                                                                },
+                                                                                {
+                                                                                    "headerName":  "Id",
+                                                                                    "field":  "Id"
+                                                                                }
+                                                                            ],
+                                                                "height":  300,
+                                                                "rowSelection":  "single"
+                                                            },
+                                                   "dataSourceConfig":  {
+                                                                            "dataSourceGuid":  "$dataSourceGuid_2",
+                                                                            "input":  {
+                                                                                          "propertyInputs":  [
+                                                                                                                 {
+                                                                                                                     "propertyName":  "selectedGroup",
+                                                                                                                     "otherFieldValue":  {
+                                                                                                                                             "otherFieldKey":  "teams"
+                                                                                                                                         }
+                                                                                                                 },
+                                                                                                                 {
+                                                                                                                     "propertyName":  "selectedRole",
+                                                                                                                     "staticValue":  {
+                                                                                                                                         "value":  "Member"
+                                                                                                                                     }
+                                                                                                                 }
+                                                                                                             ]
+                                                                                      }
+                                                                        },
+                                                   "useFilter":  true,
+                                                   "useDefault":  false
+                                               },
+                           "type":  "grid",
+                           "summaryVisibility":  "Show",
+                           "requiresTemplateOptions":  true,
+                           "requiresKey":  true,
+                           "requiresDataSource":  true
+                       },
+                       {
+                           "key":  "owners",
+                           "templateOptions":  {
+                                                   "label":  "Owners",
+                                                   "required":  false,
+                                                   "grid":  {
+                                                                "columns":  [
+                                                                                {
+                                                                                    "headerName":  "Display Name",
+                                                                                    "field":  "DisplayName"
+                                                                                },
+                                                                                {
+                                                                                    "headerName":  "Mailaddress",
+                                                                                    "field":  "Mailaddress"
+                                                                                },
+                                                                                {
+                                                                                    "headerName":  "Roles",
+                                                                                    "field":  "Roles"
+                                                                                },
+                                                                                {
+                                                                                    "headerName":  "Id",
+                                                                                    "field":  "Id"
+                                                                                }
+                                                                            ],
+                                                                "height":  300,
+                                                                "rowSelection":  "single"
+                                                            },
+                                                   "dataSourceConfig":  {
+                                                                            "dataSourceGuid":  "$dataSourceGuid_3",
+                                                                            "input":  {
+                                                                                          "propertyInputs":  [
+                                                                                                                 {
+                                                                                                                     "propertyName":  "selectedGroup",
+                                                                                                                     "otherFieldValue":  {
+                                                                                                                                             "otherFieldKey":  "teams"
+                                                                                                                                         }
+                                                                                                                 },
+                                                                                                                 {
+                                                                                                                     "propertyName":  "selectedRole",
+                                                                                                                     "staticValue":  {
+                                                                                                                                         "value":  "Owner"
+                                                                                                                                     }
+                                                                                                                 }
+                                                                                                             ]
+                                                                                      }
+                                                                        },
+                                                   "useFilter":  true,
+                                                   "useDefault":  false
+                                               },
+                           "type":  "grid",
+                           "summaryVisibility":  "Show",
+                           "requiresTemplateOptions":  true,
+                           "requiresKey":  true,
+                           "requiresDataSource":  true
+                       },
+                       {
+                           "key":  "guests",
+                           "templateOptions":  {
+                                                   "label":  "Guests",
+                                                   "required":  false,
+                                                   "grid":  {
+                                                                "columns":  [
+                                                                                {
+                                                                                    "headerName":  "Display Name",
+                                                                                    "field":  "DisplayName"
+                                                                                },
+                                                                                {
+                                                                                    "headerName":  "Mailaddress",
+                                                                                    "field":  "Mailaddress"
+                                                                                },
+                                                                                {
+                                                                                    "headerName":  "Roles",
+                                                                                    "field":  "Roles"
+                                                                                },
+                                                                                {
+                                                                                    "headerName":  "Id",
+                                                                                    "field":  "Id"
+                                                                                }
+                                                                            ],
+                                                                "height":  300,
+                                                                "rowSelection":  "single"
+                                                            },
+                                                   "dataSourceConfig":  {
+                                                                            "dataSourceGuid":  "$dataSourceGuid_4",
+                                                                            "input":  {
+                                                                                          "propertyInputs":  [
+                                                                                                                 {
+                                                                                                                     "propertyName":  "selectedGroup",
+                                                                                                                     "otherFieldValue":  {
+                                                                                                                                             "otherFieldKey":  "teams"
+                                                                                                                                         }
+                                                                                                                 },
+                                                                                                                 {
+                                                                                                                     "propertyName":  "selectedRole",
+                                                                                                                     "staticValue":  {
+                                                                                                                                         "value":  "Guest"
+                                                                                                                                     }
+                                                                                                                 }
+                                                                                                             ]
+                                                                                      }
+                                                                        },
+                                                   "useFilter":  true,
+                                                   "useDefault":  false
+                                               },
+                           "type":  "grid",
+                           "summaryVisibility":  "Show",
+                           "requiresTemplateOptions":  true,
+                           "requiresKey":  true,
+                           "requiresDataSource":  true
+                       }
+                   ]
+    }
 ]
