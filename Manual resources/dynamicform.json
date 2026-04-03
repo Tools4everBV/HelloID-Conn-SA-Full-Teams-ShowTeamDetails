@@ -63,7 +63,8 @@
                                                                                       }
                                                                         },
                                                    "useFilter":  true,
-                                                   "useDefault":  false
+                                                   "useDefault":  false,
+                                                   "allowCsvDownload":  true
                                                },
                            "type":  "grid",
                            "summaryVisibility":  "Show",
@@ -133,7 +134,8 @@
                                                                                       }
                                                                         },
                                                    "useDefault":  false,
-                                                   "useFilter":  false
+                                                   "useFilter":  false,
+                                                   "allowCsvDownload":  true
                                                },
                            "type":  "grid",
                            "summaryVisibility":  "Show",
@@ -188,7 +190,8 @@
                                                                                       }
                                                                         },
                                                    "useFilter":  true,
-                                                   "useDefault":  false
+                                                   "useDefault":  false,
+                                                   "allowCsvDownload":  true
                                                },
                            "type":  "grid",
                            "summaryVisibility":  "Show",
@@ -305,6 +308,20 @@
                            "requiresTemplateOptions":  true,
                            "requiresKey":  true,
                            "requiresDataSource":  true
+                       },
+                       {
+                           "key":  "textInput",
+                           "templateOptions":  {
+                                                   "label":  "Reporting only",
+                                                   "required":  true,
+                                                   "minLength":  1,
+                                                   "readonly":  true
+                                               },
+                           "type":  "input",
+                           "summaryVisibility":  "Show",
+                           "requiresTemplateOptions":  true,
+                           "requiresKey":  true,
+                           "requiresDataSource":  false
                        }
                    ]
     }
